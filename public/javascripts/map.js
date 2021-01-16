@@ -77,7 +77,7 @@ async function loadMap(position) {
 
     const templateStationItemList = Handlebars.compile("<li><div class='divClick' data-name='{{ titre }}'><h4>{{ titre }}</h4><p>{{ distance }} {{ velos }}</p></div><div class='separator'></div></li>")
     const templateStationInfo = Handlebars.compile(
-        "<div class='name'><h4>{{ titre }}</h4></div><p>{{ distance }} {{ velos }}</p>")
+        "<div class='name'><h4>{{ titre }}</h4></div><p>Situé à {{ distance }}m. <a href='https://www.google.com/maps/dir//43.6057292,1.4492338'>J'y vais!</a></p>")
 
     const nearestStation = nearbyStations[0]
 
@@ -121,7 +121,7 @@ async function loadMap(position) {
                 leafletMap.panTo(new L.LatLng(r.position.latitude, r.position.longitude))
                 node.innerHTML = templateStationInfo({
                     titre: r.name,
-                    distance: r.distance,
+                    distance: Math.floor(r.distance * 1000),
                     velos: r.mainStands.availabilities.bikes,
                 })
             })
