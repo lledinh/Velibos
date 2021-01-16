@@ -1,25 +1,26 @@
 @media (min-width:320px)  { /* smartphones, iPhone, portrait 480x320 phones */
   #list-stations {
-    display: block;
+    display: none;
     position: absolute;
     top: 20px;
-    left: calc(50% - 150px);
+    left: calc(50% - 200px);
     z-index: 2;
     background: #FFFFFF;
     height: calc(100% - 240px);
     border-radius: 10px;
     overflow: auto;
-    width: 300px;
+    width: 450px;
   }
 
   #list-stations ul {
     margin: 0;
     list-style: none;
-    padding: 20px;
+    padding: 20px 0;
     height: calc(100% - 40px);
     display: flex;
     flex-direction: column;
     width: 100%;
+    padding-inline-start: 0px;
   }
 }
 
@@ -47,16 +48,18 @@
     height: calc(100% - 40px);
     border-radius: 10px;
     overflow: auto;
+    width: 300px;
   }
 
   #list-stations ul {
     margin: 0;
     list-style: none;
-    padding: 20px;
+    padding: 20px 0;
     height: calc(100% - 40px);
     display: flex;
     flex-direction: column;
-    width: 16rem;
+    width: 100%;
+    padding-inline-start: 0px;
   }
 
 }
@@ -77,6 +80,10 @@ body {
 
 a {
   color: #00B7FF;
+}
+
+.show {
+  display: block !important;
 }
 
 #map {
@@ -126,6 +133,7 @@ a {
 
 #list-stations ul li {
   cursor: pointer;
+  padding: 0 10px 10px;
 }
 
 #list-stations .titre {

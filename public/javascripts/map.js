@@ -61,6 +61,17 @@ async function loadMap(position) {
         iconSize: [48, 48]
     })
 
+    const buttonCenter = document.querySelector('#center-button')
+    buttonCenter.onclick = (() => {
+        leafletMap.panTo(new L.LatLng(position.coords.latitude, position.coords.longitude))
+    })
+
+    const buttonList = document.querySelector('#list-button')
+    buttonList.onclick = (() => {
+        const stations = document.querySelector('#list-stations')
+        stations.classList.toggle("show");
+    })
+
     const userPositionMarker = L.marker([position.coords.latitude, position.coords.longitude]).addTo(leafletMap)
 
     const response = await fetch('https://api.jcdecaux.com/vls/v3/stations?contract=toulouse&apiKey=254dd398a3d00e44977933694734ba3829e89e32')
