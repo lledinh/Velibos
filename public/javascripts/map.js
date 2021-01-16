@@ -66,6 +66,11 @@ async function loadMap(position) {
     const response = await fetch('https://api.jcdecaux.com/vls/v3/stations?contract=toulouse&apiKey=254dd398a3d00e44977933694734ba3829e89e32')
     const json = await response.json()
 
+    const stations = json.map(station => {
+        station.distance = getDistanceFromLatLonInKm(position.coords.latitude, position.coords.longitude, station.position.latitude, station.position.longitude)
+        return station
+    });
+
     const nearbyStations = json.filter(station => {
         return station.mainStands.availabilities.bikes > 0
     }).map(station => {
@@ -75,7 +80,7 @@ async function loadMap(position) {
         return station.distance < 0.5;
     }).sort(compareDistance)
 
-    const templateStationItemList = Handlebars.compile("<li><div class='divClick' data-name='{{ titre }}'><h4>{{ titre }}</h4><p>{{ distance }} {{ velos }}</p></div><div class='separator'></div></li>")
+    const templateStationItemList = Handlebars.compile("<li><div class='divClick' data-name='{{ titre }}'><h4>{{ titre }}</h4><p>Situé à {{ distance }}m. {{ velos }}</p></div><div class='separator'></div></li>")
     const templateStationInfo = Handlebars.compile(
         "<div class='name'><h4>{{ titre }}</h4></div><p>Situé à {{ distance }}m. <a href='https://www.google.com/maps/dir//43.6057292,1.4492338'>J'y vais!</a></p>")
 
@@ -91,7 +96,7 @@ async function loadMap(position) {
             latitude: nearbyStations[i].position.latitude,
             longitude: nearbyStations[i].position.longitude,
             titre: nearbyStations[i].name,
-            distance: nearbyStations[i].distance,
+            distance: Math.floor(nearbyStations[i].distance * 1000),
             velos: nearbyStations[i].mainStands.availabilities.bikes,
         })
     }
@@ -110,7 +115,7 @@ async function loadMap(position) {
 
     let node = document.querySelector("#nearest-station");
 
-    for (const r of json) {
+    for (const r of stations) {
         // console.log(r.name + " => " + (getDistanceFromLatLonInKm(position.coords.latitude, position.coords.longitude, r.position.latitude, r.position.longitude)))
         let icon = (r.mainStands.availabilities.bikes > 0) ? bikeOkIcon : bikeKoIcon
         if (r.name === nearestStation.name) icon = bikeNearIcon;
