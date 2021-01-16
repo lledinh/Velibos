@@ -66,6 +66,15 @@ a {
   border-radius: 10px;
 }
 
+#nearest-station .name {
+  width: 100%;
+  background: #db4437;
+  text-align: center;
+  border-radius: 10px 10px 0px 0px;
+  background: #db4437;
+  color: #ffffff;
+}
+
 #list-stations {
   position: absolute;
   top: 20px;
@@ -105,12 +114,12 @@ a {
 
 .separator {
   height: 1px;
-  background: #ba2121;
+  background: #db4437;
   margin: 12px 20px;
 }
 .separator-titre  {
   height: 2px;
-  background: #ba2121;
+  background: #db4437;
   margin: 12px 0;
 }
 
@@ -127,6 +136,6 @@ a {
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #ba2121;
+  background: #db4437;
   border-radius: 10px;
 }

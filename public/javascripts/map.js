@@ -75,7 +75,9 @@ async function loadMap(position) {
         return station.distance < 0.5;
     }).sort(compareDistance)
 
-    var template = Handlebars.compile("<li><div class='divClick' data-name='{{ titre }}'><h4>{{ titre }}</h4><p>{{ distance }} {{ velos }}</p></div.divClick><div class='separator'></div></li>")
+    const templateStationItemList = Handlebars.compile("<li><div class='divClick' data-name='{{ titre }}'><h4>{{ titre }}</h4><p>{{ distance }} {{ velos }}</p></div><div class='separator'></div></li>")
+    const templateStationInfo = Handlebars.compile(
+        "<div class='name'><h4>{{ titre }}</h4></div><p>{{ distance }} {{ velos }}</p>")
 
     const nearestStation = nearbyStations[0]
 
@@ -85,7 +87,7 @@ async function loadMap(position) {
 
     let content = "";
     for (let i = 0; i < nearbyStations.length; i++) {
-        content = content + template({
+        content = content + templateStationItemList({
             latitude: nearbyStations[i].position.latitude,
             longitude: nearbyStations[i].position.longitude,
             titre: nearbyStations[i].name,
@@ -93,11 +95,10 @@ async function loadMap(position) {
             velos: nearbyStations[i].mainStands.availabilities.bikes,
         })
     }
-    let node = document.querySelector("#list-stations ul");
-    node.innerHTML = node.innerHTML + content;
+    let nodeUl = document.querySelector("#list-stations ul");
+    nodeUl.innerHTML = nodeUl.innerHTML + content;
 
-    const elements = node.querySelectorAll('.divClick')
-
+    const elements = nodeUl.querySelectorAll('.divClick')
     elements.forEach(function(element) {
         element.onclick = () => {
             const station = nearbyStations.filter(station => {
@@ -107,6 +108,7 @@ async function loadMap(position) {
         }
     });
 
+    let node = document.querySelector("#nearest-station");
 
     for (const r of json) {
         // console.log(r.name + " => " + (getDistanceFromLatLonInKm(position.coords.latitude, position.coords.longitude, r.position.latitude, r.position.longitude)))
@@ -114,9 +116,14 @@ async function loadMap(position) {
         if (r.name === nearestStation.name) icon = bikeNearIcon;
         var marker = L.marker([r.position.latitude, r.position.longitude], {icon: icon}).addTo(leafletMap)
         marker
-            .bindPopup('<h3>' + r.name + '</h3>' + '<p>' + r.mainStands.availabilities.bikes + ' vélos disponibles sur ' + r.mainStands.capacity + ' places</p>')
+            .bindPopup('<h4>' + r.name + '</h4>' + '<p>' + r.mainStands.availabilities.bikes + ' vélos disponibles sur ' + r.mainStands.capacity + ' places</p>')
             .on("popupopen", () => {
                 leafletMap.panTo(new L.LatLng(r.position.latitude, r.position.longitude))
+                node.innerHTML = templateStationInfo({
+                    titre: r.name,
+                    distance: r.distance,
+                    velos: r.mainStands.availabilities.bikes,
+                })
             })
     }
 }
