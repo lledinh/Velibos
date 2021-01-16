@@ -3,13 +3,13 @@
     display: none;
     position: absolute;
     top: 20px;
-    left: calc(50% - 200px);
+    left: calc(50% - 140px);
     z-index: 2;
     background: #FFFFFF;
     height: calc(100% - 240px);
     border-radius: 10px;
     overflow: auto;
-    width: 450px;
+    width: 280px;
   }
 
   #list-stations ul {
@@ -25,7 +25,18 @@
 }
 
 @media (min-width:481px)  { /* portrait e-readers (Nook/Kindle), smaller tablets @ 600 or @ 640 wide. */
-
+  #list-stations {
+    display: none;
+    position: absolute;
+    top: 20px;
+    left: calc(50% - 200px);
+    z-index: 2;
+    background: #FFFFFF;
+    height: calc(100% - 240px);
+    border-radius: 10px;
+    overflow: auto;
+    width: 400px;
+  }
 }
 
 @media (min-width:641px)  { /* portrait tablets, portrait iPad, landscape e-readers, landscape 800x480 or 854x480 phones */
