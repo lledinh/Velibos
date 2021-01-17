@@ -6,7 +6,12 @@ function getLocation() {
     }
 }
 
-function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+function isScreenMobile() {
+    return window.innerWidth < 1025;
+}
+
+
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
     const R = 6371 // Radius of the earth in km
     const dLat = deg2rad(lat2-lat1) // deg2rad below
     const dLon = deg2rad(lon2-lon1)
@@ -15,8 +20,8 @@ function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
         Math.sin(dLon/2) * Math.sin(dLon/2)
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
-    const d = R * c // Distance in km
-    return d
+     // Distance in km
+    return R * c
 }
 
 function deg2rad(deg) {
@@ -30,10 +35,6 @@ function compareDistance(a, b) {
         return 1;
 
     return 0;
-}
-
-function goToPoint(map, latitude, longitude) {
-    map.panTo(new L.LatLng(latitude, longitude))
 }
 
 async function loadMap(position) {
@@ -93,7 +94,9 @@ async function loadMap(position) {
 
     const templateStationItemList = Handlebars.compile("<li><div class='divClick' data-name='{{ titre }}'><h4>{{ titre }}</h4><p>Situé à {{ distance }}m. {{ velos }}</p></div><div class='separator'></div></li>")
     const templateStationInfo = Handlebars.compile(
-        "<div class='name'><h4>{{ titre }}</h4></div><p>Situé à {{ distance }}m. <a href='https://www.google.com/maps/dir//43.6057292,1.4492338'>J'y vais!</a></p>")
+        "<div class='name'><h4>{{ titre }}</h4></div><div class='infos'><p>Situé à {{ distance }}m</p>" +
+        "<p>{{ address }}</p>" +
+        "<p><a href='https://www.google.com/maps/dir//43.6057292,1.4492338'>J'y vais!</a></p></div>")
 
     const nearestStation = nearbyStations[0]
 
@@ -121,10 +124,20 @@ async function loadMap(position) {
                return station.name === element.dataset.name
             })[0];
             leafletMap.panTo(new L.LatLng(station.position.latitude, station.position.longitude))
+            if (isScreenMobile()) {
+                console.log("Mobile screen")
+            }
         }
     });
 
     let node = document.querySelector("#nearest-station");
+
+    node.innerHTML = templateStationInfo({
+        titre: nearestStation.name,
+        distance: Math.floor(nearestStation.distance * 1000),
+        velos: nearestStation.mainStands.availabilities.bikes,
+        address: nearestStation.address,
+    })
 
     for (const r of stations) {
         // console.log(r.name + " => " + (getDistanceFromLatLonInKm(position.coords.latitude, position.coords.longitude, r.position.latitude, r.position.longitude)))
@@ -139,6 +152,7 @@ async function loadMap(position) {
                     titre: r.name,
                     distance: Math.floor(r.distance * 1000),
                     velos: r.mainStands.availabilities.bikes,
+                    address: r.address,
                 })
             })
     }

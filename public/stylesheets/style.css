@@ -22,6 +22,18 @@
     width: 100%;
     padding-inline-start: 0px;
   }
+
+  #actions {
+    position: absolute;
+    right: 14px;
+    bottom: 160px;
+    z-index: 2;
+    display: flex;
+  }
+
+  #center-button {
+    margin: 0 10px 0 0;
+  }
 }
 
 @media (min-width:481px)  { /* portrait e-readers (Nook/Kindle), smaller tablets @ 600 or @ 640 wide. */
@@ -37,6 +49,19 @@
     overflow: auto;
     width: 400px;
   }
+
+  #actions {
+    display: block;
+    position: absolute;
+    right: 40px;
+    bottom: 20px;
+    z-index: 2;
+  }
+
+  #center-button {
+    margin-bottom: 10px;
+  }
+
 }
 
 @media (min-width:641px)  { /* portrait tablets, portrait iPad, landscape e-readers, landscape 800x480 or 854x480 phones */
@@ -73,6 +98,7 @@
     padding-inline-start: 0px;
   }
 
+
 }
 
 @media (min-width:1281px) { /* hi-res laptops and desktops */
@@ -93,6 +119,9 @@ a {
   color: #00B7FF;
 }
 
+p {
+  margin: 5px;
+}
 .show {
   display: block !important;
 }
@@ -141,6 +170,11 @@ a {
   color: #ffffff;
 }
 
+#nearest-station .infos {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  text-align: center;
+}
 
 #list-stations ul li {
   cursor: pointer;
@@ -170,13 +204,6 @@ a {
   margin: 12px 0;
 }
 
-#actions {
-  position: absolute;
-  right: 40px;
-  bottom: 20px;
-  z-index: 2;
-}
-
 #center-button, #list-button {
   height: 48px;
   width: 48px;
@@ -188,9 +215,6 @@ a {
   justify-content: center;
 }
 
-#center-button {
-  margin-bottom: 10px;
-}
 /* width */
 ::-webkit-scrollbar {
   width: 10px;
