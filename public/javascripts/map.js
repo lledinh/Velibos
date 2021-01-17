@@ -50,15 +50,15 @@ async function loadMap(position) {
     }).addTo(leafletMap)
 
     const bikeOkIcon = L.icon({
-        iconUrl: '/velibos/images/bike-ok.png',
+        iconUrl: '/velibos/static/images/bike-ok.png',
         iconSize: [48, 48]
     })
     const bikeKoIcon = L.icon({
-        iconUrl: '/velibos/images/bike-ko.png',
+        iconUrl: '/velibos/static/images/bike-ko.png',
         iconSize: [48, 48]
     })
     const bikeNearIcon = L.icon({
-        iconUrl: '/velibos/images/bike-pres.png',
+        iconUrl: '/velibos/static/images/bike-pres.png',
         iconSize: [48, 48]
     })
 
