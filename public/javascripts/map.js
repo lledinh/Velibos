@@ -37,8 +37,20 @@ function compareDistance(a, b) {
     return 0;
 }
 
-async function loadMap(position) {
-    const leafletMap = L.map('map').setView([position.coords.latitude, position.coords.longitude], 16.5)
+async function getStationsLocations(userPosition) {
+    const response = await fetch('https://api.jcdecaux.com/vls/v3/stations?contract=toulouse&apiKey=254dd398a3d00e44977933694734ba3829e89e32')
+    const json = await response.json()
+
+    const stations = json.map(station => {
+        station.distance = getDistanceFromLatLonInKm(userPosition.coords.latitude, userPosition.coords.longitude, station.position.latitude, station.position.longitude)
+        return station
+    });
+
+    return stations
+}
+
+function initMap(userPosition) {
+    const leafletMap = L.map('map').setView([userPosition.coords.latitude, userPosition.coords.longitude], 16.5)
 
     L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -62,9 +74,17 @@ async function loadMap(position) {
         iconSize: [48, 48]
     })
 
+    return {
+        map: leafletMap,
+        bikeOkIcon,
+        bikeKoIcon,
+        bikeNearIcon
+    }
+}
+function initActionsButtons(leafletMap, userPosition) {
     const buttonCenter = document.querySelector('#center-button')
     buttonCenter.onclick = (() => {
-        leafletMap.panTo(new L.LatLng(position.coords.latitude, position.coords.longitude))
+        leafletMap.panTo(new L.LatLng(userPosition.coords.latitude, userPosition.coords.longitude))
     })
 
     const buttonList = document.querySelector('#list-button')
@@ -72,22 +92,20 @@ async function loadMap(position) {
         const stations = document.querySelector('#list-stations')
         stations.classList.toggle("show");
     })
+}
 
-    const userPositionMarker = L.marker([position.coords.latitude, position.coords.longitude]).addTo(leafletMap)
+async function loadMap(userPosition) {
+    const leafletMap = initMap(userPosition)
 
-    const response = await fetch('https://api.jcdecaux.com/vls/v3/stations?contract=toulouse&apiKey=254dd398a3d00e44977933694734ba3829e89e32')
-    const json = await response.json()
+    initActionsButtons(leafletMap.map, userPosition)
 
-    const stations = json.map(station => {
-        station.distance = getDistanceFromLatLonInKm(position.coords.latitude, position.coords.longitude, station.position.latitude, station.position.longitude)
-        return station
-    });
+    // Add marker at user position
+    const userPositionMarker = L.marker([userPosition.coords.latitude, userPosition.coords.longitude]).addTo(leafletMap.map)
 
-    const nearbyStations = json.filter(station => {
+    const stations = await getStationsLocations(userPosition)
+
+    const nearbyStations = stations.filter(station => {
         return station.mainStands.availabilities.bikes > 0
-    }).map(station => {
-            station.distance = getDistanceFromLatLonInKm(position.coords.latitude, position.coords.longitude, station.position.latitude, station.position.longitude)
-            return station
     }).filter(station => {
         return station.distance < 0.5;
     }).sort(compareDistance)
@@ -96,13 +114,10 @@ async function loadMap(position) {
     const templateStationInfo = Handlebars.compile(
         "<div class='name'><h4>{{ titre }}</h4></div><div class='infos'><p>Situé à {{ distance }}m</p>" +
         "<p>{{ address }}</p>" +
-        "<p><a href='https://www.google.com/maps/dir//43.6057292,1.4492338'>J'y vais!</a></p></div>")
+        "<p><a href={{ mapURL }}>J'y vais!</a></p></div>")
 
+    // https://www.google.com/maps/dir//43.6057292,1.4492338
     const nearestStation = nearbyStations[0]
-
-    console.log(json.length)
-    console.log(nearbyStations.length)
-    console.log(nearbyStations)
 
     let content = "";
     for (let i = 0; i < nearbyStations.length; i++) {
@@ -125,7 +140,8 @@ async function loadMap(position) {
             })[0];
             leafletMap.panTo(new L.LatLng(station.position.latitude, station.position.longitude))
             if (isScreenMobile()) {
-                console.log("Mobile screen")
+                const listStations = document.querySelector('#list-stations')
+                listStations.classList.toggle("show")
             }
         }
     });
@@ -137,22 +153,24 @@ async function loadMap(position) {
         distance: Math.floor(nearestStation.distance * 1000),
         velos: nearestStation.mainStands.availabilities.bikes,
         address: nearestStation.address,
+        mapURL: 'https://www.google.com/maps/dir//' + nearestStation.position.latitude + ',' + nearestStation.position.longitude
     })
 
     for (const r of stations) {
         // console.log(r.name + " => " + (getDistanceFromLatLonInKm(position.coords.latitude, position.coords.longitude, r.position.latitude, r.position.longitude)))
-        let icon = (r.mainStands.availabilities.bikes > 0) ? bikeOkIcon : bikeKoIcon
-        if (r.name === nearestStation.name) icon = bikeNearIcon;
-        var marker = L.marker([r.position.latitude, r.position.longitude], {icon: icon}).addTo(leafletMap)
+        let icon = (r.mainStands.availabilities.bikes > 0) ? leafletMap.bikeOkIcon : leafletMap.bikeKoIcon
+        if (r.name === nearestStation.name) icon = leafletMap.bikeNearIcon;
+        var marker = L.marker([r.position.latitude, r.position.longitude], {icon: icon}).addTo(leafletMap.map)
         marker
             .bindPopup('<h4>' + r.name + '</h4>' + '<p>' + r.mainStands.availabilities.bikes + ' vélos disponibles sur ' + r.mainStands.capacity + ' places</p>')
             .on("popupopen", () => {
-                leafletMap.panTo(new L.LatLng(r.position.latitude, r.position.longitude))
+                leafletMap.map.panTo(new L.LatLng(r.position.latitude, r.position.longitude))
                 node.innerHTML = templateStationInfo({
                     titre: r.name,
                     distance: Math.floor(r.distance * 1000),
                     velos: r.mainStands.availabilities.bikes,
                     address: r.address,
+                    mapURL: 'https://www.google.com/maps/dir//' + r.position.latitude+ ',' + r.position.longitude
                 })
             })
     }
